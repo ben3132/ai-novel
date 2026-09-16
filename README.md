@@ -152,6 +152,7 @@ git push origin main
 
 ## 文档
 
+- [`docs/PATHS.md`](docs/PATHS.md) —— **本地路径地图**：代码/数据在哪、谁读谁、换机器怎么恢复
 - [`docs/architecture.md`](docs/architecture.md) —— 完整分层设计、各层职责边界、已知缺口
 - [`docs/creation-layer.md`](docs/creation-layer.md) —— L3 创作层的设计论证与踩坑记录
 - 各子项目目录内另有自己的 `README.md` 与 `CHANGELOG.md`
