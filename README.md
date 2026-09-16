@@ -152,6 +152,7 @@ git push origin main
 
 ## 文档
 
+- [`docs/OVERVIEW.md`](docs/OVERVIEW.md) —— **项目与数据说明**：每个项目是什么、解决什么问题、数据长什么样
 - [`docs/PATHS.md`](docs/PATHS.md) —— **本地路径地图**：代码/数据在哪、谁读谁、换机器怎么恢复
 - [`docs/architecture.md`](docs/architecture.md) —— 完整分层设计、各层职责边界、已知缺口
 - [`docs/creation-layer.md`](docs/creation-layer.md) —— L3 创作层的设计论证与踩坑记录
