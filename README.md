@@ -130,6 +130,26 @@ python ce.py doctor      # 看它认出了哪些外部项目、分别从哪里�
 
 ---
 
+## 更新这个仓库
+
+改完代码后：
+
+```bat
+push.bat "feat: 你的改动说明"
+```
+
+或手动：
+
+```bash
+git add -A
+git commit -m "feat: 你的改动说明"
+git push origin main
+```
+
+凭据走系统凭据管理器，不会把 token 写进 `.git/config`。
+
+---
+
 ## 文档
 
 - [`docs/architecture.md`](docs/architecture.md) —— 完整分层设计、各层职责边界、已知缺口
