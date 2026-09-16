@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: novel-memory-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-novel}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me}
+      POSTGRES_DB: ${POSTGRES_DB:-novel_memory}
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      # 宿主机端口可用 HOST_DB_PORT 覆盖，避免与本地既有 5432 冲突
+      - "${HOST_DB_PORT:-5432}:5432"
+    volumes:
+      # init.sql 仅在数据卷【首次初始化】时自动执行；
+      # 修改 schema 后需 docker compose down -v 重灌或手动 psql -f init.sql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-novel} -d ${POSTGRES_DB:-novel_memory}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  pgdata:

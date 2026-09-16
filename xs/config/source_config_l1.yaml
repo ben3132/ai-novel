@@ -1,0 +1,1503 @@
+# 仅实现在线/本地 L1 (trust_level=1) 与 L1-derived (trust_level=11) 原始获取。
+# L2/L3/L4 网页采集器已经注册；L2/L3 可按等级归档检索，L4 只能作为线索且禁止推理。
+#
+# L1-derived 强制规则：trust_level 固定为 11，且输出 extra_meta.note 固定写明
+# “第三方转录副本，必须L1原件交叉验证”。不得把 Wiki 当作 L1-derived。
+# 本项目仅用于本地考据研究；不得公开分发抓取到的版权内容。
+
+http_defaults: &http_defaults
+  timeout: 30
+  retries: 3
+  backoff_factor: 0.8
+  delay_seconds: 1.0
+  headers:
+    User-Agent: "IP-Source-L1-Collector/1.1 (local research; respect robots.txt and terms)"
+
+source_meta_defaults: &source_meta_defaults
+  authenticity_status: verified
+  continuity: unknown
+  work_title: unknown
+  work_version: unknown
+  canon_scope: unknown
+  content_status: official_reference
+  completeness: partial
+  language: unknown
+  original_language: unknown
+  translation_status: original
+  published_ts: null
+  effective_from: null
+  effective_to: null
+  supersedes_source_id: null
+  evidence_status: direct
+
+# 公开媒体字幕任务模板（不是可执行任务）。填写具体官方视频 URL 后再复制到 tasks。
+media_task_templates:
+  official_subtitle_l1:
+    collector: official_media_subtitle_l1
+    trust_level: 1
+    download_video: false
+    noplaylist: true
+    media:
+      official_channel_asserted: true
+      subtitle_origin: official
+      include_automatic_captions: false
+      languages: ["en", "zh-Hans"]
+      preferred_formats: ["vtt", "srt", "ttml", "json3"]
+      download_all_formats: false
+  automatic_or_third_party_subtitle:
+    collector: derived_media_subtitle
+    trust_level: 11
+    download_video: false
+    noplaylist: true
+    media:
+      subtitle_origin: third_party_or_automatic
+      include_automatic_captions: true
+      languages: ["en", "zh-Hans"]
+      preferred_formats: ["vtt", "srt", "ttml", "json3"]
+      download_all_formats: false
+
+# 只作人工来源索引；不会自动运行。
+# Wiki 不按域名自动定级：有可核验引用规范时可评 L2，否则按 L3；不得标记为 L1/11。
+official_reference_urls:
+  douluo: "https://www.qidian.com/book/1115277/"
+  naruto: "https://naruto-official.com/"
+  lol_cn: "https://yz.lol.qq.com/"
+  lol_global: "https://universe.leagueoflegends.com/en-US/"
+  transformers: "https://www.transformers.com/"
+  transformers_pulse: "https://www.hasbropulse.com/collections/transformers"
+  ben10_warner: "https://www.warnerbros.com/tv/ben-10-classic-complete-collection"
+  ben10_creator_document: "https://dwaynemcduffie.com/wp-content/uploads/2024/07/WEBSITE-B10Hero-Generation-SERIES-BIBLE-by-Dwayne.pdf"
+  kungfu_panda: "https://www.dreamworks.com/movies/kung-fu-panda"
+  jackie_chan_cn: "https://shaoer.cntv.cn/program/cllxj/"
+  # 希腊神话没有现代版权方官网。Theoi/Wikisource 是第三方整理/转录，不标 L1；
+  # Perseus 的具体版本化原文或扫描件需逐项核验，不能把门户首页直接当作原典 L1。
+  myth_athena: null
+
+# 默认全部禁用，避免首次运行自动下载。启用前逐项确认授权、条款和 robots.txt。
+tasks:
+  - name: soul_land_1_tencent_official_playlist
+    source_key: soul_land_1_tencent_official_playlist
+    enabled: true
+    collector: official_media_playlist_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://www.youtube.com/playlist?list=PLxOs22nkVmnJI1_URegvYQM8tOUg-iaug"
+    download_video: false
+    media: {official_channel_asserted: true, max_entries: 1000}
+    source_meta: {work_title: "斗罗大陆 动画", continuity: "official_animation_adaptation", canon_scope: "official_episode_playlist", language: "multi", completeness: "playlist_snapshot"}
+    output: data/raw/api/soul_land_1_tencent_playlist.jsonl
+
+  - name: soul_land_2_tencent_official_playlist
+    source_key: soul_land_2_tencent_official_playlist
+    enabled: true
+    collector: official_media_playlist_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://www.youtube.com/playlist?list=PLxOs22nkVmnIHBNKvMwn8UAa4NVz2LZao"
+    download_video: false
+    media: {official_channel_asserted: true, max_entries: 1000}
+    source_meta: {work_title: "斗罗大陆II绝世唐门 动画", continuity: "official_animation_adaptation", canon_scope: "official_episode_playlist", language: "multi", completeness: "playlist_snapshot"}
+    output: data/raw/api/soul_land_2_tencent_playlist.jsonl
+
+  - name: soul_land_2_ep1_100_official_subtitles
+    source_key: soul_land_2_ep1_100_official_subtitles
+    enabled: true
+    collector: official_media_subtitle_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://www.youtube.com/watch?v=JGErzLYyn-U"
+    download_video: false
+    noplaylist: true
+    media:
+      official_channel_asserted: true
+      subtitle_origin: official
+      include_automatic_captions: false
+      languages: ["en", "zh-Hans", "zh-Hant"]
+      preferred_formats: ["vtt", "srt", "ttml", "json3"]
+      download_all_formats: false
+    source_meta:
+      work_title: "斗罗大陆II绝世唐门 动画 EP1-100"
+      continuity: "official_animation_adaptation"
+      canon_scope: "official_episode_compilation_subtitles"
+      language: "multi"
+      completeness: "episodes_1_100_compilation"
+    output: data/raw/subtitle/soul_land_2_ep1_100_official.jsonl
+
+  - name: douluo_qidian_official_full_content_follow
+    source_key: douluo_qidian_official_full_content_follow
+    enabled: true
+    collector: official_index_follow_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://dl.qidian.com/index.php/NewHome/dldl/index"
+    http:
+      timeout: 20
+      retries: 3
+      backoff_factor: 0.8
+      delay_seconds: 0.6
+      headers: {X-Requested-With: "XMLHttpRequest", User-Agent: "IPSourceResearchBot/0.1 (local provenance research)"}
+    robots_user_agent: "IPSourceResearchBot"
+    robots_on_error: deny
+    max_items: 1000
+    indexes:
+      - kind: strategy
+        url: "https://dl.qidian.com/index.php/NewHome/dldl/strategyList/tag/0/per_page/1000/page/1"
+        detail_url_template: "https://dl.qidian.com/index.php/NewHome/dldl/strategy/id/{id}"
+      - kind: news
+        url: "https://dl.qidian.com/index.php/NewHome/dldl/newsList/tag/0/per_page/1000/page/1"
+        detail_url_template: "https://dl.qidian.com/index.php/NewHome/dldl/news/id/{id}"
+    source_meta:
+      work_title: "新斗罗大陆官方站完整公开内容"
+      continuity: "official_game_adaptation"
+      canon_scope: "official_site_archive"
+      language: "zh"
+      completeness: "full_published_index_at_collection_time"
+    output: data/raw/web/douluo_qidian_official_full_content.jsonl
+
+  - name: douluo_qidian_official_news_follow
+    source_key: douluo_qidian_official_news_follow
+    enabled: true
+    collector: official_index_follow_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://dl.qidian.com/index.php/NewHome/dldl/newsList/tag/0"
+    http:
+      timeout: 20
+      retries: 3
+      backoff_factor: 0.8
+      delay_seconds: 0.6
+      headers: {X-Requested-With: "XMLHttpRequest", User-Agent: "IPSourceResearchBot/0.1 (local provenance research)"}
+    robots_user_agent: "IPSourceResearchBot"
+    robots_on_error: deny
+    max_items: 1000
+    indexes:
+      - kind: news
+        url: "https://dl.qidian.com/index.php/NewHome/dldl/newsList/tag/0/per_page/1000/page/1"
+        detail_url_template: "https://dl.qidian.com/index.php/NewHome/dldl/news/id/{id}"
+    source_meta: {work_title: "新斗罗大陆官方资讯完整归档", continuity: "official_game_adaptation", canon_scope: "official_site_archive", language: "zh", completeness: "full_published_news_index_at_collection_time"}
+    output: data/raw/web/douluo_qidian_official_news_full.jsonl
+
+  - name: douluo_qidian_strategy_index_api
+    source_key: douluo_qidian_strategy_index_api
+    enabled: true
+    collector: official_api_l1
+    trust_level: 1
+    ip_domain: douluo
+    method: GET
+    url: "https://dl.qidian.com/index.php/NewHome/dldl/strategyList/tag/0/per_page/1000/page/1"
+    params: {}
+    http:
+      headers: {X-Requested-With: "XMLHttpRequest", User-Agent: "IPSourceResearchBot/0.1 (local provenance research)"}
+    source_meta: {work_title: "新斗罗大陆攻略索引", continuity: "official_game_adaptation", canon_scope: "official_content_index", language: "zh", completeness: "full_index_request"}
+    output: data/raw/api/douluo_qidian_strategy_index.jsonl
+
+  - name: douluo_qidian_news_index_api
+    source_key: douluo_qidian_news_index_api
+    enabled: true
+    collector: official_api_l1
+    trust_level: 1
+    ip_domain: douluo
+    method: GET
+    url: "https://dl.qidian.com/index.php/NewHome/dldl/newsList/tag/0/per_page/1000/page/1"
+    params: {}
+    http:
+      headers: {X-Requested-With: "XMLHttpRequest", User-Agent: "IPSourceResearchBot/0.1 (local provenance research)"}
+    source_meta: {work_title: "新斗罗大陆资讯索引", continuity: "official_game_adaptation", canon_scope: "official_content_index", language: "zh", completeness: "full_index_request"}
+    output: data/raw/api/douluo_qidian_news_index.jsonl
+
+  - name: douluo_qidian_official_site_crawl
+    source_key: douluo_qidian_official_site_crawl
+    enabled: true
+    collector: official_site_crawl_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://dl.qidian.com/index.php/NewHome/dldl/index"
+    http:
+      timeout: 20
+      retries: 3
+      backoff_factor: 0.8
+      delay_seconds: 0.6
+      headers:
+        User-Agent: "IPSourceResearchBot/0.1 (local provenance research)"
+    crawl:
+      allowed_domains: ["dl.qidian.com"]
+      allowed_path_prefixes: ["/index.php/NewHome/dldl/", "/index.php/home/dldl/"]
+      max_pages: 350
+      max_depth: 5
+      robots_user_agent: "IPSourceResearchBot"
+    robots_on_error: deny
+    source_meta:
+      work_title: "新斗罗大陆官方站"
+      continuity: "official_game_adaptation"
+      canon_scope: "official_site_archive"
+      language: "zh"
+      completeness: "bounded_site_crawl"
+    output: data/raw/web/douluo_qidian_official_site_crawl.jsonl
+
+  - {name: douluo_game_tang_hao_official, source_key: douluo_game_tang_hao_official, enabled: true, collector: official_web_l1, trust_level: 1, ip_domain: douluo, url: "https://dl.qidian.com/index.php/NewHome/dldl/strategy/id/146", source_meta: {work_title: "新斗罗大陆", continuity: "official_game_adaptation", canon_scope: "haotian_sect_and_plane_lord_profile", language: "zh", completeness: "character_and_skill_profile"}, output: data/raw/web/douluo_game_tang_hao.jsonl}
+  - {name: douluo_game_ah_yin_official, source_key: douluo_game_ah_yin_official, enabled: true, collector: official_web_l1, trust_level: 1, ip_domain: douluo, url: "https://dl.qidian.com/index.php/home/dldl/newsCont/id/264", source_meta: {work_title: "新斗罗大陆", continuity: "official_game_adaptation", canon_scope: "blue_silver_emperor_and_spirit_beast_profile", language: "zh", completeness: "character_and_skill_profile"}, output: data/raw/web/douluo_game_ah_yin.jsonl}
+  - {name: douluo_game_bo_saixi_official, source_key: douluo_game_bo_saixi_official, enabled: true, collector: official_web_l1, trust_level: 1, ip_domain: douluo, url: "https://dl.qidian.com/index.php/NewHome/dldl/strategy/id/151", source_meta: {work_title: "新斗罗大陆", continuity: "official_game_adaptation", canon_scope: "sea_god_island_and_inheritance_profile", language: "zh", completeness: "character_and_skill_profile"}, output: data/raw/web/douluo_game_bo_saixi.jsonl}
+
+  # 斗罗1核心人物：均为《新斗罗大陆》官方改编资料，与小说连续性隔离。
+  - {name: douluo_game_gu_rong_official, source_key: douluo_game_gu_rong_official, enabled: true, collector: official_web_l1, trust_level: 1, ip_domain: douluo, url: "https://dl.qidian.com/index.php/NewHome/dldl/strategy/id/200", source_meta: {work_title: "新斗罗大陆", continuity: "official_game_adaptation", canon_scope: "character_and_qibao_sect_profile", language: "zh", completeness: "character_and_skill_profile"}, output: data/raw/web/douluo_game_gu_rong.jsonl}
+  - {name: douluo_game_gui_mei_official, source_key: douluo_game_gui_mei_official, enabled: true, collector: official_web_l1, trust_level: 1, ip_domain: douluo, url: "https://dl.qidian.com/index.php/NewHome/dldl/strategy/id/202", source_meta: {work_title: "新斗罗大陆", continuity: "official_game_adaptation", canon_scope: "character_and_spirit_hall_profile", language: "zh", completeness: "character_and_skill_profile"}, output: data/raw/web/douluo_game_gui_mei.jsonl}
+  - {name: douluo_game_yue_guan_official, source_key: douluo_game_yue_guan_official, enabled: true, collector: official_web_l1, trust_level: 1, ip_domain: douluo, url: "https://dl.qidian.com/index.php/NewHome/dldl/strategy/id/209", source_meta: {work_title: "新斗罗大陆", continuity: "official_game_adaptation", canon_scope: "character_and_spirit_hall_profile", language: "zh", completeness: "character_and_skill_profile"}, output: data/raw/web/douluo_game_yue_guan.jsonl}
+  - {name: douluo_game_chen_xin_official, source_key: douluo_game_chen_xin_official, enabled: true, collector: official_web_l1, trust_level: 1, ip_domain: douluo, url: "https://dl.qidian.com/index.php/NewHome/dldl/strategy/id/213", source_meta: {work_title: "新斗罗大陆", continuity: "official_game_adaptation", canon_scope: "character_and_qibao_sect_profile", language: "zh", completeness: "character_and_skill_profile"}, output: data/raw/web/douluo_game_chen_xin.jsonl}
+  - {name: douluo_game_zhu_zhuqing_official, source_key: douluo_game_zhu_zhuqing_official, enabled: true, collector: official_web_l1, trust_level: 1, ip_domain: douluo, url: "https://dl.qidian.com/index.php/NewHome/dldl/strategy/id/206", source_meta: {work_title: "新斗罗大陆", continuity: "official_game_adaptation", canon_scope: "shrek_seven_character_profile", language: "zh", completeness: "character_and_skill_profile"}, output: data/raw/web/douluo_game_zhu_zhuqing.jsonl}
+  - {name: douluo_game_ning_rongrong_official, source_key: douluo_game_ning_rongrong_official, enabled: true, collector: official_web_l1, trust_level: 1, ip_domain: douluo, url: "https://dl.qidian.com/index.php/NewHome/dldl/strategy/id/207", source_meta: {work_title: "新斗罗大陆", continuity: "official_game_adaptation", canon_scope: "shrek_seven_and_qibao_sect_profile", language: "zh", completeness: "character_and_skill_profile"}, output: data/raw/web/douluo_game_ning_rongrong.jsonl}
+  - {name: douluo_game_ma_hongjun_official, source_key: douluo_game_ma_hongjun_official, enabled: true, collector: official_web_l1, trust_level: 1, ip_domain: douluo, url: "https://dl.qidian.com/index.php/NewHome/dldl/strategy/id/211", source_meta: {work_title: "新斗罗大陆", continuity: "official_game_adaptation", canon_scope: "shrek_seven_character_profile", language: "zh", completeness: "character_and_skill_profile"}, output: data/raw/web/douluo_game_ma_hongjun.jsonl}
+  - {name: douluo_game_dai_mubai_official, source_key: douluo_game_dai_mubai_official, enabled: true, collector: official_web_l1, trust_level: 1, ip_domain: douluo, url: "https://dl.qidian.com/index.php/home/dldl/newsCont/id/313", source_meta: {work_title: "新斗罗大陆", continuity: "official_game_adaptation", canon_scope: "shrek_seven_and_star_luo_profile", language: "zh", completeness: "character_and_skill_profile"}, output: data/raw/web/douluo_game_dai_mubai.jsonl}
+  - {name: douluo_game_oscar_official, source_key: douluo_game_oscar_official, enabled: true, collector: official_web_l1, trust_level: 1, ip_domain: douluo, url: "https://dl.qidian.com/index.php/home/dldl/newsCont/id/366", source_meta: {work_title: "新斗罗大陆", continuity: "official_game_adaptation", canon_scope: "shrek_seven_character_profile", language: "zh", completeness: "character_and_skill_profile"}, output: data/raw/web/douluo_game_oscar.jsonl}
+
+  - name: douluo_game_roster_official
+    source_key: douluo_game_roster_official
+    enabled: true
+    collector: official_web_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://dl.qidian.com/index.php/NewHome/dldl/index"
+    source_meta:
+      work_title: "新斗罗大陆"
+      continuity: "official_game_adaptation"
+      canon_scope: "official_character_roster"
+      language: "zh"
+      completeness: "roster_index"
+    output: data/raw/web/douluo_game_roster.jsonl
+
+  - name: douluo_game_bibi_dong_official
+    source_key: douluo_game_bibi_dong_official
+    enabled: true
+    collector: official_web_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://dl.qidian.com/index.php/NewHome/dldl/strategy/id/199"
+    source_meta:
+      work_title: "新斗罗大陆"
+      continuity: "official_game_adaptation"
+      canon_scope: "character_and_spirit_hall_profile"
+      language: "zh"
+      completeness: "character_and_skill_profile"
+    output: data/raw/web/douluo_game_bibi_dong.jsonl
+
+  - name: douluo_game_qian_renxue_official
+    source_key: douluo_game_qian_renxue_official
+    enabled: true
+    collector: official_web_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://dl.qidian.com/index.php/NewHome/dldl/strategy/id/208"
+    source_meta:
+      work_title: "新斗罗大陆"
+      continuity: "official_game_adaptation"
+      canon_scope: "character_and_god_inheritance_profile"
+      language: "zh"
+      completeness: "character_and_skill_profile"
+    output: data/raw/web/douluo_game_qian_renxue.jsonl
+
+  - name: douluo_game_qian_daoliu_official
+    source_key: douluo_game_qian_daoliu_official
+    enabled: true
+    collector: official_web_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://dl.qidian.com/index.php/NewHome/dldl/strategy/id/205"
+    source_meta:
+      work_title: "新斗罗大陆"
+      continuity: "official_game_adaptation"
+      canon_scope: "spirit_hall_and_extreme_douluo_profile"
+      language: "zh"
+      completeness: "character_and_faction_profile"
+    output: data/raw/web/douluo_game_qian_daoliu.jsonl
+
+  - name: douluo_game_tang_chen_official
+    source_key: douluo_game_tang_chen_official
+    enabled: true
+    collector: official_web_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://dl.qidian.com/index.php/NewHome/dldl/strategy/id/203"
+    source_meta:
+      work_title: "新斗罗大陆"
+      continuity: "official_game_adaptation"
+      canon_scope: "haotian_sect_and_asura_inheritance_profile"
+      language: "zh"
+      completeness: "character_and_faction_profile"
+    output: data/raw/web/douluo_game_tang_chen.jsonl
+
+  - name: douluo_game_xiao_wu_official
+    source_key: douluo_game_xiao_wu_official
+    enabled: true
+    collector: official_web_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://dl.qidian.com/index.php/NewHome/dldl/strategy/id/201"
+    source_meta:
+      work_title: "新斗罗大陆"
+      continuity: "official_game_adaptation"
+      canon_scope: "character_and_spirit_beast_profile"
+      language: "zh"
+      completeness: "character_and_skill_profile"
+    output: data/raw/web/douluo_game_xiao_wu.jsonl
+
+  - name: douluo_game_tang_san_character_official
+    source_key: douluo_game_tang_san_character_official
+    enabled: true
+    collector: official_web_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://dl.qidian.com/index.php/NewHome/dldl/strategy/id/210"
+    source_meta:
+      work_title: "新斗罗大陆"
+      continuity: "official_game_adaptation"
+      canon_scope: "game_character_profile"
+      language: "zh"
+      completeness: "character_and_skill_profile"
+    output: data/raw/web/douluo_game_tang_san_character.jsonl
+
+  - name: douluo_game_previous_tang_san_official
+    source_key: douluo_game_previous_tang_san_official
+    enabled: true
+    collector: official_web_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://dl.qidian.com/index.php/NewHome/dldl/strategy/id/192"
+    source_meta:
+      work_title: "新斗罗大陆"
+      continuity: "official_game_adaptation"
+      canon_scope: "game_character_profile"
+      language: "zh"
+      completeness: "character_and_skill_profile"
+    output: data/raw/web/douluo_game_previous_tang_san.jsonl
+
+  - name: douluo_game_sea_god_tang_san_official
+    source_key: douluo_game_sea_god_tang_san_official
+    enabled: true
+    collector: official_web_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://dl.qidian.com/index.php/NewHome/dldl/strategy/id/98"
+    source_meta:
+      work_title: "新斗罗大陆"
+      continuity: "official_game_adaptation"
+      canon_scope: "game_character_profile"
+      language: "zh"
+      completeness: "character_and_skill_profile"
+    output: data/raw/web/douluo_game_sea_god_tang_san.jsonl
+
+  - name: tencent_animation_marketing_douluo_pdf
+    source_key: tencent_animation_marketing_douluo_pdf
+    enabled: true
+    collector: official_document_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://file.tencentads.com/files/pdf/2020/3/d3e379e9c6944238947ffe47149add9e/%E8%85%BE%E8%AE%AF%E5%9B%BD%E6%BC%AB%E8%90%A5%E9%94%80%E6%94%BB%E7%95%A5%EF%BC%88%E4%B8%8A%EF%BC%89.pdf"
+    source_meta:
+      work_title: "腾讯国漫营销攻略（上）"
+      continuity: "official_animation_adaptation"
+      canon_scope: "official_marketing_document"
+      language: "zh"
+      completeness: "ip_synopsis_and_metrics"
+    output: data/raw/api/tencent_animation_marketing_douluo.jsonl
+
+  - name: tencent_douluo_brand_cooperation_pdf
+    source_key: tencent_douluo_brand_cooperation_pdf
+    enabled: true
+    collector: official_document_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://file.tencentads.com/files/pdf/2020/7/b552257c712c4b4db87b24d07f86b728.pdf"
+    source_meta:
+      work_title: "腾讯二次元营销资料"
+      continuity: "official_animation_adaptation"
+      canon_scope: "official_marketing_document"
+      language: "zh"
+      completeness: "ip_metrics_and_brand_cases"
+    output: data/raw/api/tencent_douluo_brand_cooperation.jsonl
+
+  - name: tangmen_heroes_qidian_honor
+    source_key: tangmen_heroes_qidian_honor
+    enabled: true
+    collector: official_web_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://book.qidian.com/honor/1011641567"
+    source_meta:
+      work_title: "斗罗大陆外传唐门英雄传"
+      continuity: "between_douluo_3_and_4"
+      canon_scope: "official_bibliographic_page"
+      language: "zh"
+      completeness: "work_metadata"
+    output: data/raw/web/tangmen_heroes_qidian_honor.jsonl
+
+  - name: tangmen_heroes_google_books_api
+    source_key: tangmen_heroes_google_books_api
+    enabled: true
+    collector: l2_web
+    trust_level: 2
+    ip_domain: douluo
+    url: "https://www.googleapis.com/books/v1/volumes/_1MhyQEACAAJ"
+    source_meta:
+      work_title: "斗罗大陆外传唐门英雄传"
+      continuity: "between_douluo_3_and_4"
+      canon_scope: "bibliographic_api_reference"
+      language: "zh"
+      completeness: "publication_metadata"
+    output: data/raw/reference_web/tangmen_heroes_google_books_api.jsonl
+
+  - name: tangmen_heroes_qidian_user_booklist
+    source_key: tangmen_heroes_qidian_user_booklist
+    enabled: true
+    collector: l3_web
+    trust_level: 3
+    ip_domain: douluo
+    url: "https://book.qidian.com/booklist/detail/337970/1/"
+    robots_user_agent: "IPSourceResearchBot"
+    http:
+      headers:
+        User-Agent: "IPSourceResearchBot/0.1 (local provenance research)"
+    source_meta:
+      work_title: "斗罗大陆外传唐门英雄传"
+      continuity: "between_douluo_3_and_4"
+      canon_scope: "user_curated_booklist"
+      language: "zh"
+      completeness: "work_link_and_synopsis"
+    output: data/raw/reference_web/tangmen_heroes_qidian_booklist.jsonl
+
+  - name: tangmen_heroes_webnovel_official_catalog
+    source_key: tangmen_heroes_webnovel_official_catalog
+    enabled: true
+    collector: official_web_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://www.webnovel.com/book/10165704804088503/catalog"
+    source_meta:
+      work_title: "斗罗大陆外传唐门英雄传"
+      continuity: "between_douluo_3_and_4"
+      canon_scope: "official_platform_catalog"
+      language: "zh"
+      completeness: "chapter_catalog"
+    output: data/raw/web/tangmen_heroes_webnovel_catalog.jsonl
+
+  - name: tangmen_heroes_google_books_bibliography
+    source_key: tangmen_heroes_google_books_bibliography
+    enabled: true
+    collector: l2_web
+    trust_level: 2
+    ip_domain: douluo
+    url: "https://books.google.com/books/about/%E6%96%97%E7%BD%97%E5%A4%A7%E9%99%86%E5%A4%96%E4%BC%A0.html?id=_1MhyQEACAAJ"
+    source_meta:
+      work_title: "斗罗大陆外传唐门英雄传"
+      continuity: "between_douluo_3_and_4"
+      canon_scope: "bibliographic_reference"
+      language: "zh"
+      completeness: "publication_metadata"
+    output: data/raw/reference_web/tangmen_heroes_google_books.jsonl
+
+  - name: tangmen_heroes_baidu_baike
+    source_key: tangmen_heroes_baidu_baike
+    enabled: true
+    collector: l2_web
+    trust_level: 2
+    ip_domain: douluo
+    url: "https://wapbaike.baidu.com/item/%E6%96%97%E7%BD%97%E5%A4%A7%E9%99%86%E5%A4%96%E4%BC%A0%E5%94%90%E9%97%A8%E8%8B%B1%E9%9B%84%E4%BC%A0/22667638"
+    source_meta:
+      work_title: "斗罗大陆外传唐门英雄传"
+      continuity: "between_douluo_3_and_4"
+      canon_scope: "cited_encyclopedia_reference"
+      language: "zh"
+      completeness: "work_and_character_overview"
+    output: data/raw/reference_web/tangmen_heroes_baidu_baike.jsonl
+
+  - name: douluo_series_baidu_baike
+    source_key: douluo_series_baidu_baike
+    enabled: true
+    collector: l2_web
+    trust_level: 2
+    ip_domain: douluo
+    url: "https://bkso.baidu.com/item/%E3%80%8A%E6%96%97%E7%BD%97%E5%A4%A7%E9%99%86%E3%80%8B/55276691"
+    source_meta:
+      work_title: "斗罗大陆系列"
+      continuity: "novel_series_overview"
+      canon_scope: "cited_encyclopedia_reference"
+      language: "zh"
+      completeness: "series_and_cultivation_overview"
+    output: data/raw/reference_web/douluo_series_baidu_baike.jsonl
+
+  - name: huo_yuhao_baidu_baike
+    source_key: huo_yuhao_baidu_baike
+    enabled: true
+    collector: l2_web
+    trust_level: 2
+    ip_domain: douluo
+    url: "https://wapbaike.baidu.com/item/%E9%9C%8D%E9%9B%A8%E6%B5%A9/16304288"
+    source_meta:
+      work_title: "斗罗大陆II绝世唐门"
+      continuity: "douluo_main_2"
+      canon_scope: "character_reference"
+      language: "zh"
+      completeness: "character_overview"
+    output: data/raw/reference_web/huo_yuhao_baidu_baike.jsonl
+
+  - name: douluo_divine_realm_qidian_honor
+    source_key: douluo_divine_realm_qidian_honor
+    enabled: true
+    collector: official_web_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://book.qidian.com/honor/3450647"
+    source_meta:
+      work_title: "斗罗大陆外传神界传说"
+      continuity: "between_douluo_2_and_3"
+      canon_scope: "official_bibliographic_page"
+      language: "zh"
+      completeness: "work_metadata"
+    output: data/raw/web/douluo_divine_realm_qidian_honor.jsonl
+
+  - name: douluo_2_qidian_honor
+    source_key: douluo_2_qidian_honor
+    enabled: true
+    collector: official_web_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://book.qidian.com/honor/2517792"
+    source_meta:
+      work_title: "斗罗大陆II绝世唐门"
+      continuity: "douluo_main_2"
+      canon_scope: "official_bibliographic_page"
+      language: "zh"
+      completeness: "work_metadata"
+    output: data/raw/web/douluo_2_qidian_honor.jsonl
+
+  - name: douluo_3_qidian_honor
+    source_key: douluo_3_qidian_honor
+    enabled: true
+    collector: official_web_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://book.qidian.com/honor/3681560"
+    source_meta:
+      work_title: "斗罗大陆III龙王传说"
+      continuity: "douluo_main_3"
+      canon_scope: "official_bibliographic_page"
+      language: "zh"
+      completeness: "work_metadata"
+    output: data/raw/web/douluo_3_qidian_honor.jsonl
+
+  - name: douluo_4_qidian_honor
+    source_key: douluo_4_qidian_honor
+    enabled: true
+    collector: official_web_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://book.qidian.com/honor/1013406185"
+    source_meta:
+      work_title: "斗罗大陆IV终极斗罗"
+      continuity: "douluo_main_4"
+      canon_scope: "official_bibliographic_page"
+      language: "zh"
+      completeness: "work_metadata"
+    output: data/raw/web/douluo_4_qidian_honor.jsonl
+
+  - name: douluo_5_qidian_honor
+    source_key: douluo_5_qidian_honor
+    enabled: true
+    collector: official_web_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://book.qidian.com/honor/1027996625"
+    source_meta:
+      work_title: "斗罗大陆V重生唐三"
+      continuity: "douluo_main_5"
+      canon_scope: "official_bibliographic_page"
+      language: "zh"
+      completeness: "work_metadata"
+    output: data/raw/web/douluo_5_qidian_honor.jsonl
+
+  - name: douluo_qidian_user_booklist_series
+    source_key: douluo_qidian_user_booklist_series
+    enabled: true
+    collector: l3_web
+    trust_level: 3
+    ip_domain: douluo
+    url: "https://book.qidian.com/booklist/detail/232971/"
+    robots_user_agent: "IPSourceResearchBot"
+    http:
+      headers:
+        User-Agent: "IPSourceResearchBot/0.1 (local provenance research)"
+    source_meta:
+      work_title: "斗罗大陆系列"
+      continuity: "series_overview"
+      canon_scope: "user_curated_booklist"
+      language: "zh"
+      completeness: "partial_series_index"
+    output: data/raw/reference_web/douluo_qidian_user_booklist.jsonl
+
+  # 斗罗系列 L2 总览与世界观索引。Wiki 只能作线索/交叉参照，不能覆盖原著结论。
+  - name: douluo_series_zhwiki_overview
+    source_key: douluo_series_zhwiki_overview
+    enabled: true
+    collector: l2_web
+    trust_level: 2
+    ip_domain: douluo
+    url: "https://zh.wikipedia.org/wiki/%E6%96%97%E7%BD%97%E5%A4%A7%E9%99%86"
+    robots_user_agent: "IPSourceResearchBot"
+    http:
+      headers:
+        User-Agent: "IPSourceResearchBot/0.1 (local provenance research)"
+    source_meta:
+      work_title: "斗罗大陆系列"
+      continuity: "novel_series_overview"
+      canon_scope: "community_reference"
+      language: "zh"
+      completeness: "series_index"
+    output: data/raw/reference_web/douluo_series_zhwiki.jsonl
+
+  - name: tang_jia_san_shao_zhwiki_bibliography
+    source_key: tang_jia_san_shao_zhwiki_bibliography
+    enabled: true
+    collector: l2_web
+    trust_level: 2
+    ip_domain: douluo
+    url: "https://zh.wikipedia.org/wiki/%E5%94%90%E5%AE%B6%E4%B8%89%E5%B0%91"
+    robots_user_agent: "IPSourceResearchBot"
+    http:
+      headers:
+        User-Agent: "IPSourceResearchBot/0.1 (local provenance research)"
+    source_meta:
+      work_title: "唐家三少作品表"
+      continuity: "author_bibliography"
+      canon_scope: "community_reference"
+      language: "zh"
+      completeness: "bibliography_index"
+    output: data/raw/reference_web/tang_jia_san_shao_zhwiki.jsonl
+
+  - name: douluo_fandom_tang_san
+    source_key: douluo_fandom_tang_san
+    enabled: true
+    collector: l2_web
+    trust_level: 2
+    ip_domain: douluo
+    url: "https://soulland.fandom.com/wiki/Tang_San"
+    robots_user_agent: "IPSourceResearchBot"
+    http:
+      headers:
+        User-Agent: "IPSourceResearchBot/0.1 (local provenance research)"
+    source_meta:
+      work_title: "斗罗大陆系列"
+      continuity: "cross_work_character"
+      canon_scope: "fan_wiki_reference"
+      language: "en"
+      completeness: "character_overview"
+    output: data/raw/reference_web/douluo_fandom_tang_san.jsonl
+
+  - name: douluo_fandom_divine_realm
+    source_key: douluo_fandom_divine_realm
+    enabled: true
+    collector: l2_web
+    trust_level: 2
+    ip_domain: douluo
+    url: "https://soulland.fandom.com/wiki/Douluo_Divine_Realm"
+    robots_user_agent: "IPSourceResearchBot"
+    http:
+      headers:
+        User-Agent: "IPSourceResearchBot/0.1 (local provenance research)"
+    source_meta:
+      work_title: "斗罗大陆外传神界传说 / 唐门英雄传"
+      continuity: "divine_realm"
+      canon_scope: "fan_wiki_reference"
+      language: "en"
+      completeness: "setting_overview"
+    output: data/raw/reference_web/douluo_fandom_divine_realm.jsonl
+
+  - name: douluo_authorized_local_text_example
+    source_key: douluo_authorized_local_text
+    enabled: false
+    collector: local_l1
+    trust_level: 1
+    ip_domain: douluo
+    path: source_l1/text/douluo_authorized.txt
+    encoding: utf-8
+    source_meta:
+      <<: *source_meta_defaults
+      continuity: douluo_novel
+      work_title: 斗罗大陆
+      content_status: published_canon
+      completeness: complete
+      language: zh-CN
+      original_language: zh-CN
+    output: data/raw/text/douluo.jsonl
+
+  # 用户提供的完整 TXT 无法证明为官方数字原件，全部固定为 L1-derived=11。
+  # 原文件原样导入，不清洗其中可能存在的下载站标记；处理层只生成派生分片。
+  - name: douluo_1_local_derived_complete_txt
+    source_key: douluo_1_local_derived_complete_txt
+    enabled: false
+    collector: local_derived_text
+    trust_level: 11
+    ip_domain: douluo
+    path: source_derived/text/douluo/斗罗大陆_唐家三少.txt
+    encoding: utf-8
+    original_import_path: "user_supplied/斗罗大陆_唐家三少.txt"
+    source_meta:
+      authenticity_status: unverified
+      continuity: douluo_1
+      work_title: 斗罗大陆
+      work_version: third_party_txt_copy
+      canon_scope: main_novel_transcription
+      content_status: complete_claimed
+      completeness: complete_claimed
+      language: zh-CN
+      original_language: zh-CN
+      evidence_status: requires_cross_check
+    output: data/raw/derived_text/douluo_1_complete.jsonl
+
+  - name: douluo_2_local_derived_complete_txt
+    source_key: douluo_2_local_derived_complete_txt
+    enabled: false
+    collector: local_derived_text
+    trust_level: 11
+    ip_domain: douluo
+    path: source_derived/text/douluo/斗罗大陆2绝世唐门_唐家三少.txt
+    encoding: utf-8
+    original_import_path: "user_supplied/斗罗大陆2绝世唐门_唐家三少.txt"
+    source_meta:
+      authenticity_status: unverified
+      continuity: douluo_2
+      work_title: 斗罗大陆II绝世唐门
+      work_version: third_party_txt_copy
+      canon_scope: main_novel_transcription
+      content_status: complete_claimed
+      completeness: complete_claimed
+      language: zh-CN
+      original_language: zh-CN
+      evidence_status: requires_cross_check
+    output: data/raw/derived_text/douluo_2_complete.jsonl
+
+  - name: douluo_3_local_derived_complete_txt
+    source_key: douluo_3_local_derived_complete_txt
+    enabled: false
+    collector: local_derived_text
+    trust_level: 11
+    ip_domain: douluo
+    path: source_derived/text/douluo/斗罗大陆3龙王传说_唐家三少.txt
+    encoding: utf-8
+    original_import_path: "user_supplied/斗罗大陆3龙王传说_唐家三少.txt"
+    source_meta:
+      authenticity_status: unverified
+      continuity: douluo_3
+      work_title: 斗罗大陆III龙王传说
+      work_version: third_party_txt_copy
+      canon_scope: main_novel_transcription
+      content_status: complete_claimed
+      completeness: complete_claimed
+      language: zh-CN
+      original_language: zh-CN
+      evidence_status: requires_cross_check
+    output: data/raw/derived_text/douluo_3_complete.jsonl
+
+  - name: douluo_4_local_derived_complete_txt
+    source_key: douluo_4_local_derived_complete_txt
+    enabled: false
+    collector: local_derived_text
+    trust_level: 11
+    ip_domain: douluo
+    path: source_derived/text/douluo/斗罗大陆4终极斗罗_唐家三少.txt
+    encoding: utf-8
+    original_import_path: "user_supplied/斗罗大陆4终极斗罗_唐家三少.txt"
+    source_meta:
+      authenticity_status: unverified
+      continuity: douluo_4
+      work_title: 斗罗大陆IV终极斗罗
+      work_version: third_party_txt_copy
+      canon_scope: main_novel_transcription
+      content_status: complete_claimed
+      completeness: complete_claimed
+      language: zh-CN
+      original_language: zh-CN
+      evidence_status: requires_cross_check
+    output: data/raw/derived_text/douluo_4_complete.jsonl
+
+  - name: douluo_5_local_derived_complete_txt
+    source_key: douluo_5_local_derived_complete_txt
+    enabled: false
+    collector: local_derived_text
+    trust_level: 11
+    ip_domain: douluo
+    path: source_derived/text/douluo/斗罗大陆5重生唐三_唐家三少.txt
+    encoding: utf-8
+    original_import_path: "user_supplied/斗罗大陆5重生唐三_唐家三少.txt"
+    source_meta:
+      authenticity_status: unverified
+      continuity: douluo_5
+      work_title: 斗罗大陆V重生唐三
+      work_version: third_party_txt_copy
+      canon_scope: main_novel_transcription
+      content_status: complete_claimed
+      completeness: complete_claimed
+      language: zh-CN
+      original_language: zh-CN
+      evidence_status: requires_cross_check
+    output: data/raw/derived_text/douluo_5_complete.jsonl
+
+  - name: douluo_divine_realm_local_derived_complete_txt
+    source_key: douluo_divine_realm_local_derived_complete_txt
+    enabled: false
+    collector: local_derived_text
+    trust_level: 11
+    ip_domain: douluo
+    path: source_derived/text/douluo/斗罗大陆外传神界传说_唐家三少.txt
+    encoding: utf-8
+    original_import_path: "user_supplied/斗罗大陆外传神界传说_唐家三少.txt"
+    source_meta:
+      authenticity_status: unverified
+      continuity: douluo_divine_realm
+      work_title: 斗罗大陆外传神界传说
+      work_version: third_party_txt_copy
+      canon_scope: side_story_novel_transcription
+      content_status: complete_claimed
+      completeness: complete_claimed
+      language: zh-CN
+      original_language: zh-CN
+      evidence_status: requires_cross_check
+    output: data/raw/derived_text/douluo_divine_realm_complete.jsonl
+
+  - name: douluo_tangmen_heroes_local_derived_complete_txt
+    source_key: douluo_tangmen_heroes_local_derived_complete_txt
+    enabled: false
+    collector: local_derived_text
+    trust_level: 11
+    ip_domain: douluo
+    path: source_derived/text/douluo/斗罗大陆外传唐门英雄传_唐家三少.txt
+    encoding: utf-8
+    original_import_path: "user_supplied/斗罗大陆外传唐门英雄传_唐家三少.txt"
+    source_meta:
+      authenticity_status: unverified
+      continuity: douluo_tangmen_heroes
+      work_title: 斗罗大陆外传唐门英雄传
+      work_version: third_party_txt_copy
+      canon_scope: side_story_novel_transcription
+      content_status: complete_claimed
+      completeness: complete_claimed
+      language: zh-CN
+      original_language: zh-CN
+      evidence_status: requires_cross_check
+    output: data/raw/derived_text/douluo_tangmen_heroes_complete.jsonl
+
+  - name: douluo_shrek_team_local_derived_complete_txt
+    source_key: douluo_shrek_team_local_derived_complete_txt
+    enabled: false
+    collector: local_derived_text
+    trust_level: 11
+    ip_domain: douluo
+    path: source_derived/text/douluo/斗罗大陆外传史莱克天团_唐家三少.txt
+    encoding: utf-8
+    original_import_path: "user_supplied/斗罗大陆外传史莱克天团_唐家三少.txt"
+    source_meta:
+      authenticity_status: unverified
+      continuity: douluo_shrek_team
+      work_title: 斗罗大陆外传史莱克天团
+      work_version: third_party_txt_copy
+      canon_scope: side_story_novel_transcription
+      content_status: complete_claimed
+      completeness: complete_claimed
+      language: zh-CN
+      original_language: zh-CN
+      evidence_status: requires_cross_check
+    output: data/raw/derived_text/douluo_shrek_team_complete.jsonl
+
+  - name: douluo_qidian_official_book_page
+    source_key: douluo_qidian_official_book_page
+    enabled: false
+    collector: dynamic_web_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://www.qidian.com/book/1115277/"
+    http: *http_defaults
+    robots_on_error: deny
+    browser:
+      channel: chrome
+      allowed_domains: ["www.qidian.com", "book.qidian.com"]
+      capture_resource_types: ["document", "xhr", "fetch"]
+      max_responses: 50
+      timeout_ms: 45000
+      wait_after_ms: 2000
+      wait_until: domcontentloaded
+      user_agent: "IP-Source-L1-Collector"
+    source_meta:
+      <<: *source_meta_defaults
+      continuity: douluo_novel
+      work_title: 斗罗大陆
+      canon_scope: main_canon
+      content_status: official_reference
+      completeness: partial
+      language: zh-CN
+      original_language: zh-CN
+    output: data/raw/web/douluo_qidian_book.jsonl
+
+  - name: douluo_qidian_official_game_intro
+    source_key: douluo_qidian_official_game_intro
+    enabled: false
+    collector: official_web_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://dl.qidian.com/index.php/NewHome/dldl/intro"
+    http: *http_defaults
+    source_meta:
+      <<: *source_meta_defaults
+      continuity: douluo_official_game_adaptation
+      work_title: 新斗罗大陆
+      canon_scope: adaptation
+      content_status: promotional
+      completeness: partial
+      language: zh-CN
+      original_language: zh-CN
+    output: data/raw/web/douluo_qidian_game_intro.jsonl
+
+  - name: tang_jia_san_shao_china_writers_profile
+    source_key: tang_jia_san_shao_china_writers_profile
+    enabled: false
+    collector: official_web_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://www.chinawriter.com.cn/GB/n1/2022/1109/c404947-32562308.html"
+    http: *http_defaults
+    source_meta:
+      <<: *source_meta_defaults
+      continuity: author_profile
+      work_title: 唐家三少
+      canon_scope: author_biography
+      content_status: official_reference
+      completeness: partial
+      language: zh-CN
+      original_language: zh-CN
+    output: data/raw/web/tang_jia_san_shao_china_writers.jsonl
+
+  - name: yuewen_official_company_profile
+    source_key: yuewen_official_company_profile
+    enabled: false
+    collector: official_web_l1
+    trust_level: 1
+    ip_domain: douluo
+    url: "https://www.yuewen.com/about?part=leader"
+    http: *http_defaults
+    source_meta:
+      <<: *source_meta_defaults
+      continuity: author_and_ip_reference
+      work_title: 阅文集团官方介绍
+      canon_scope: corporate_reference
+      content_status: official_reference
+      completeness: excerpt
+      language: zh-CN
+      original_language: zh-CN
+    output: data/raw/web/yuewen_douluo_tangjiasanshao.jsonl
+
+  - name: naruto_official_site
+    source_key: naruto_official_site
+    enabled: false
+    collector: official_web_l1
+    trust_level: 1
+    ip_domain: naruto
+    url: "https://naruto-official.com/"
+    http: *http_defaults
+    source_meta:
+      <<: *source_meta_defaults
+      continuity: naruto_franchise
+      work_title: NARUTO
+      content_status: official_reference
+      language: ja
+      original_language: ja
+    output: data/raw/web/naruto_official.jsonl
+
+  - name: lol_cn_universe
+    source_key: lol_cn_universe
+    enabled: false
+    collector: official_site_crawl_l1
+    trust_level: 1
+    ip_domain: lol
+    url: "https://yz.lol.qq.com/"
+    http: *http_defaults
+    crawl:
+      allowed_domains: ["yz.lol.qq.com"]
+      allowed_path_prefixes: ["/"]
+      max_pages: 100
+      max_depth: 3
+      robots_user_agent: "IP-Source-L1-Collector"
+    robots_on_error: deny
+    source_meta:
+      <<: *source_meta_defaults
+      continuity: runeterra_current
+      work_title: 英雄联盟宇宙
+      language: zh-CN
+      original_language: en
+      translation_status: official_translation
+    output: data/raw/web/lol_cn_universe.jsonl
+
+  - name: lol_data_dragon_versions
+    source_key: lol_data_dragon_versions
+    enabled: false
+    collector: official_api_l1
+    trust_level: 1
+    ip_domain: lol
+    method: GET
+    url: "https://ddragon.leagueoflegends.com/api/versions.json"
+    params: {}
+    http: *http_defaults
+    source_meta:
+      <<: *source_meta_defaults
+      continuity: league_of_legends_game_data
+      work_title: League of Legends Data Dragon
+      content_status: official_reference
+      completeness: complete
+      language: en
+      original_language: en
+    output: data/raw/api/lol_data_dragon_versions.jsonl
+
+  - name: lol_data_dragon_catalog
+    source_key: lol_data_dragon_catalog
+    enabled: false
+    collector: lol_data_dragon_l1
+    trust_level: 1
+    ip_domain: lol
+    versions_url: "https://ddragon.leagueoflegends.com/api/versions.json"
+    cdn_base_url: "https://ddragon.leagueoflegends.com/cdn"
+    # version留空时使用官方版本列表第一项；该解析只用于发现URL。
+    version: null
+    locales: ["zh_CN", "en_US"]
+    datasets: ["champion", "item", "runesReforged"]
+    http: *http_defaults
+    source_meta:
+      <<: *source_meta_defaults
+      continuity: league_of_legends_game_data
+      work_title: League of Legends Data Dragon
+      content_status: official_reference
+      completeness: complete
+      original_language: en
+    output: data/raw/api/lol_data_dragon_catalog.jsonl
+
+  - name: lol_global_universe_dynamic
+    source_key: lol_global_universe_dynamic
+    enabled: false
+    collector: dynamic_web_l1
+    trust_level: 1
+    ip_domain: lol
+    url: "https://universe.leagueoflegends.com/en-US/"
+    http: *http_defaults
+    robots_on_error: deny
+    browser:
+      # Windows已安装 Chrome时可直接复用，避免另行下载 Chromium；也可删除本行使用Playwright Chromium。
+      channel: chrome
+      allowed_domains: ["universe.leagueoflegends.com"]
+      capture_resource_types: ["document", "xhr", "fetch"]
+      max_responses: 100
+      timeout_ms: 45000
+      wait_after_ms: 3000
+      wait_until: networkidle
+      user_agent: "IP-Source-L1-Collector"
+    source_meta:
+      <<: *source_meta_defaults
+      continuity: runeterra_current
+      work_title: League of Legends Universe
+      language: en-US
+      original_language: en
+    output: data/raw/web/lol_global_dynamic.jsonl
+
+  - name: transformers_official_site
+    source_key: transformers_official_site
+    enabled: false
+    collector: official_web_l1
+    trust_level: 1
+    ip_domain: transformers
+    url: "https://www.transformers.com/"
+    http: *http_defaults
+    source_meta:
+      <<: *source_meta_defaults
+      continuity: transformers_franchise_unspecified
+      work_title: Transformers
+      content_status: promotional
+      completeness: excerpt
+      language: en
+      original_language: en
+    output: data/raw/web/transformers_official.jsonl
+
+  - name: ben10_warner_official_page
+    source_key: ben10_warner_official_page
+    enabled: false
+    collector: official_web_l1
+    trust_level: 1
+    ip_domain: ben10
+    url: "https://www.warnerbros.com/tv/ben-10-classic-complete-collection"
+    http: *http_defaults
+    source_meta:
+      <<: *source_meta_defaults
+      continuity: ben10_classic
+      work_title: "Ben 10 (Classic)"
+      content_status: promotional
+      completeness: excerpt
+      language: en
+      original_language: en
+    output: data/raw/web/ben10_warner.jsonl
+
+  - name: ben10_hero_generation_series_bible
+    source_key: ben10_hero_generation_series_bible
+    enabled: false
+    collector: official_document_l1
+    trust_level: 1
+    ip_domain: ben10
+    url: "https://dwaynemcduffie.com/wp-content/uploads/2024/07/WEBSITE-B10Hero-Generation-SERIES-BIBLE-by-Dwayne.pdf"
+    max_bytes: 52428800
+    http: *http_defaults
+    source_meta:
+      <<: *source_meta_defaults
+      continuity: ben10_alien_force_development
+      work_title: "Ben 10: Hero Generation Series Bible"
+      work_version: "First Draft, 2007-06-03"
+      canon_scope: preproduction
+      content_status: development_draft
+      completeness: complete
+      language: en
+      original_language: en
+    output: data/raw/document/ben10_series_bible.jsonl
+
+  - name: ben10_hero_generation_ep101_script
+    source_key: ben10_hero_generation_ep101_script
+    enabled: false
+    collector: official_document_l1
+    trust_level: 1
+    ip_domain: ben10
+    url: "https://dwaynemcduffie.com/wp-content/uploads/2025/05/WEBSITE-B10AF-B10HeroGeneration-ep101-Ben-10-Returns-part1-SCRIPT-AS-BROADCAST.pdf"
+    max_bytes: 52428800
+    http: *http_defaults
+    source_meta:
+      <<: *source_meta_defaults
+      continuity: ben10_alien_force_development
+      work_title: "Ben 10: Hero Generation Series Bible"
+      content_status: as_broadcast_script
+      completeness: complete
+      language: en
+      original_language: en
+    output: data/raw/document/ben10_ep101_script.jsonl
+
+  - name: ben10_ep101_wikia_readable_copy
+    source_key: ben10_ep101_wikia_readable_copy
+    enabled: true
+    collector: derived_document
+    trust_level: 11
+    ip_domain: ben10
+    url: "https://static.wikia.nocookie.net/ben10/images/a/a5/B10R1_Script_As_Broadcast.pdf"
+    max_bytes: 52428800
+    http: *http_defaults
+    source_meta:
+      <<: *source_meta_defaults
+      continuity: ben10_alien_force_development
+      work_title: "Ben 10: Hero Generation Series Bible"
+      content_status: transcription
+      completeness: complete
+      language: en
+      original_language: en
+      authenticity_status: probable
+      translation_status: none
+    output: data/raw/derived_document/ben10_ep101_wikia.jsonl
+
+  # 百度百科词条页 robots.txt 禁采 /item/，采集器合规拒绝；保留登记作为已知缺口候选
+  - name: ben10_omnitrix_baidu_baike
+    source_key: ben10_omnitrix_baidu_baike
+    enabled: false
+    collector: l2_web
+    trust_level: 2
+    ip_domain: ben10
+    url: "https://wapbaike.baidu.com/item/%E8%B6%85%E8%83%BD%E4%BB%AA"
+    http: *http_defaults
+    source_meta:
+      <<: *source_meta_defaults
+      continuity: ben10_classic
+      work_title: "Ben 10 (Classic)"
+      canon_scope: zh_translation_and_item_reference
+      content_status: reference
+      completeness: item_and_translation_overview
+      language: zh-CN
+      original_language: en
+      translation_status: community_translation
+    output: data/raw/reference_web/ben10_omnitrix_baidu.jsonl
+
+  - name: ben10_moegirl_shaonianhaike
+    source_key: ben10_moegirl_shaonianhaike
+    enabled: true
+    collector: l3_web
+    trust_level: 3
+    ip_domain: ben10
+    url: "https://zh.moegirl.org.cn/%E5%B0%91%E5%B9%B4%E9%AA%87%E5%AE%A2"
+    http: *http_defaults
+    source_meta:
+      <<: *source_meta_defaults
+      continuity: ben10_franchise_overview
+      work_title: "Ben 10 系列"
+      canon_scope: zh_translation_and_character_reference
+      content_status: reference
+      completeness: franchise_character_overview
+      language: zh-CN
+      original_language: en
+      translation_status: community_translation
+    output: data/raw/reference_web/ben10_moegirl_shaonian.jsonl
+
+  # Fandom 参考 Wiki（L2）经公开 MediaWiki API 采集；走本机 v2rayN 出网代理（proxies 按环境调整/删除）
+  - name: ben10_fandom_reference_wiki
+    source_key: ben10_fandom_reference_wiki
+    enabled: true
+    collector: reference_wiki_api_l2
+    trust_level: 2
+    ip_domain: ben10
+    mediawiki:
+      api: "https://ben10.fandom.com/api.php"
+      pages:
+        - Ben 10 (2005 TV Series)
+        - Ben Tennyson (Classic)
+        - Omnitrix (Original)
+        - Azmuth
+        - Rook Blonko
+        - Gwen Tennyson
+        - Kevin Levin
+        - Max Tennyson
+        - Heatblast
+        - Heatblast (Classic)
+        - Pyronite
+        - Pyros
+        - Four Arms
+        - XLR8
+        - Diamondhead
+        - Wildmutt
+        - Grey Matter
+        - Stinkfly
+        - Ripjaws
+        - Upgrade
+        - Ghostfreak
+        - Alien X
+        - Vilgax
+        - Highbreed
+        - DNAlien
+        - Goop (Classic)
+        - Polymorph
+        - Viscosia
+        - Humungousaur
+        - Humungousaur (Classic)
+        - Vaxasaurian
+        - Jury Rigg
+        - Juryrigg
+        - Planchaküle
+        - Unitrix
+        - Eunice
+        - Plumbers (Classic)
+    http:
+      <<: *http_defaults
+      proxies:
+        http: "http://localhost:10809"
+        https: "http://localhost:10809"
+    source_meta:
+      <<: *source_meta_defaults
+      continuity: ben10_classic
+      work_title: "Ben 10 (Classic) Fandom Wiki"
+      canon_scope: en_reference
+      content_status: reference
+      completeness: selected_articles
+      language: en
+      original_language: en
+      authenticity_status: unverified
+    output: data/raw/reference_web/ben10_fandom.jsonl
+
+  - name: jackie_chan_fandom_transcripts
+    source_key: jackie_chan_fandom_transcripts
+    enabled: true
+    collector: reference_transcript_api_l11
+    trust_level: 11
+    ip_domain: jackie_chan
+    mediawiki:
+      api: "https://jackiechanadventures.fandom.com/api.php"
+      category: "Category:Transcripts"
+      title_prefix: "Transcript:"
+    http:
+      <<: *http_defaults
+      delay_seconds: 1.2
+      proxies:
+        http: "http://localhost:10809"
+        https: "http://localhost:10809"
+    source_meta:
+      <<: *source_meta_defaults
+      continuity: jackie_chan_adventures_tv
+      work_title: "Jackie Chan Adventures Fandom Wiki (Episode Transcripts)"
+      canon_scope: en_transcription
+      content_status: transcription
+      completeness: full_series_transcripts
+      language: en
+      original_language: en
+      authenticity_status: unverified
+      note: "社区逐集台词转录（第三方转录 trust 11）；名台词引用须回查原作"
+    output: data/raw/reference_web/jackie_chan_fandom_transcripts.jsonl
+
+  - name: jackie_chan_fandom_reference_wiki
+    source_key: jackie_chan_fandom_reference_wiki
+    enabled: true
+    collector: reference_wiki_api_l2
+    trust_level: 2
+    ip_domain: jackie_chan
+    mediawiki:
+      api: "https://jackiechanadventures.fandom.com/api.php"
+      pages:
+        - Talismans
+        - Shendu
+        - Demon Sorcerers
+        - Oni Masks
+        - Shadowkhan
+        - Chi
+        - Black Magic
+        - Jackie Chan
+        - Jade Chan
+        - Uncle
+        - Valmont
+        - Tohru
+        - Dark Hand
+        - Chan Clan
+        - Section 13
+        - Tarakudo
+        - Daolon Wong
+        - Chupacabra
+        - El Toro Fuerte
+        - Talisman Locator
+        - The Curse of El Chupacabra
+    http:
+      <<: *http_defaults
+      proxies:
+        http: "http://localhost:10809"
+        https: "http://localhost:10809"
+    source_meta:
+      <<: *source_meta_defaults
+      continuity: jackie_chan_adventures_tv
+      work_title: "Jackie Chan Adventures Fandom Wiki"
+      canon_scope: en_reference
+      content_status: reference
+      completeness: selected_articles
+      language: en
+      original_language: en
+      authenticity_status: unverified
+    output: data/raw/reference_web/jackie_chan_fandom.jsonl
+
+  - name: kungfu_panda_official_site
+    source_key: kungfu_panda_official_site
+    enabled: false
+    collector: official_web_l1
+    trust_level: 1
+    ip_domain: kungfu_panda
+    url: "https://www.dreamworks.com/movies/kung-fu-panda"
+    http: *http_defaults
+    source_meta:
+      <<: *source_meta_defaults
+      continuity: kungfu_panda_film
+      work_title: Kung Fu Panda
+      content_status: promotional
+      completeness: excerpt
+      language: en
+      original_language: en
+    output: data/raw/web/kungfu_panda_official.jsonl
+
+  - name: jackie_chan_cctv_official_cn_release
+    source_key: jackie_chan_cctv_official_cn_release
+    enabled: false
+    collector: official_web_l1
+    trust_level: 1
+    ip_domain: jackie_chan
+    url: "https://shaoer.cntv.cn/program/cllxj/"
+    http: *http_defaults
+    source_meta:
+      <<: *source_meta_defaults
+      continuity: jackie_chan_adventures_tv
+      work_title: 成龙历险记
+      canon_scope: adaptation
+      content_status: localization
+      completeness: partial
+      language: zh-CN
+      original_language: en
+      translation_status: official_translation
+    output: data/raw/web/jackie_chan_cctv.jsonl
+
+  - name: jackie_chan_moegirl_overview
+    source_key: jackie_chan_moegirl_overview
+    enabled: true
+    collector: l3_web
+    trust_level: 3
+    ip_domain: jackie_chan
+    url: "https://zh.moegirl.org.cn/%E6%88%90%E9%BE%99%E5%8E%86%E9%99%A9%E8%AE%B0"
+    http: *http_defaults
+    source_meta:
+      <<: *source_meta_defaults
+      continuity: jackie_chan_adventures_tv
+      work_title: 成龙历险记
+      canon_scope: zh_translation_and_setting_reference
+      content_status: reference
+      completeness: franchise_setting_overview
+      language: zh-CN
+      original_language: en
+      translation_status: community_translation
+      authenticity_status: unverified
+    output: data/raw/reference_web/jackie_chan_moegirl.jsonl
+
+  - name: third_party_transcription_example
+    source_key: transformers_third_party_transcription_example
+    enabled: false
+    collector: derived_web
+    trust_level: 11
+    ip_domain: transformers
+    url: "https://example.invalid/transcript/episode-1"
+    http: *http_defaults
+    source_meta:
+      <<: *source_meta_defaults
+      authenticity_status: probable
+      continuity: transformers_g1_us
+      content_status: transcription
+      completeness: unknown
+      translation_status: fan_translation
+    output: data/raw/derived_web/transformers_transcript.jsonl
+
+  # 斗罗 L2 补充索引：百科仅作人物/设定检索线索，不能替代原著或官方资料。
+  - {name: douluo_sogou_series, source_key: douluo_sogou_series, enabled: true, collector: l2_web, trust_level: 2, ip_domain: douluo, url: "https://baike.sogou.com/m/fullLemma?lid=167795328", source_meta: {work_title: "斗罗大陆", continuity: "series_overview", canon_scope: "community_encyclopedia_reference", language: "zh", completeness: "series_overview"}, output: data/raw/reference_web/douluo_sogou_series.jsonl}
+  - {name: douluo_sogou_tang_san, source_key: douluo_sogou_tang_san, enabled: true, collector: l2_web, trust_level: 2, ip_domain: douluo, url: "https://baike.sogou.com/m/fullLemma?lid=718696", source_meta: {work_title: "斗罗大陆系列", continuity: "cross_work_character", canon_scope: "community_encyclopedia_reference", language: "zh", completeness: "character_overview"}, output: data/raw/reference_web/douluo_sogou_tang_san.jsonl}
+  - {name: douluo_sogou_huo_yuhao, source_key: douluo_sogou_huo_yuhao, enabled: true, collector: l2_web, trust_level: 2, ip_domain: douluo, url: "https://baike.sogou.com/v57840662.htm", source_meta: {work_title: "斗罗大陆II绝世唐门", continuity: "douluo_main_2", canon_scope: "community_encyclopedia_reference", language: "zh", completeness: "character_overview"}, output: data/raw/reference_web/douluo_sogou_huo_yuhao.jsonl}
+  - {name: douluo_sogou_jueshi_tangmen, source_key: douluo_sogou_jueshi_tangmen, enabled: true, collector: l2_web, trust_level: 2, ip_domain: douluo, url: "https://baike.sogou.com/m/fullLemma?lid=67779616", source_meta: {work_title: "斗罗大陆II绝世唐门", continuity: "douluo_main_2", canon_scope: "community_encyclopedia_reference", language: "zh", completeness: "work_and_setting_overview"}, output: data/raw/reference_web/douluo_sogou_jueshi_tangmen.jsonl}
+  - {name: douluo_sogou_tang_wulin, source_key: douluo_sogou_tang_wulin, enabled: true, collector: l2_web, trust_level: 2, ip_domain: douluo, url: "https://baike.sogou.com/m/fullLemma?lid=140129425", source_meta: {work_title: "斗罗大陆III龙王传说", continuity: "douluo_main_3", canon_scope: "community_encyclopedia_reference", language: "zh", completeness: "character_overview"}, output: data/raw/reference_web/douluo_sogou_tang_wulin.jsonl}
+  - {name: douluo_sogou_gu_yuena, source_key: douluo_sogou_gu_yuena, enabled: true, collector: l2_web, trust_level: 2, ip_domain: douluo, url: "https://baike.sogou.com/m/fullLemma?lid=157421389", source_meta: {work_title: "斗罗大陆III龙王传说", continuity: "douluo_main_3", canon_scope: "community_encyclopedia_reference", language: "zh", completeness: "character_overview"}, output: data/raw/reference_web/douluo_sogou_gu_yuena.jsonl}
+  - {name: douluo_sogou_shrek_academy, source_key: douluo_sogou_shrek_academy, enabled: true, collector: l2_web, trust_level: 2, ip_domain: douluo, url: "https://baike.sogou.com/v73088882.htm", source_meta: {work_title: "斗罗大陆系列", continuity: "cross_era_setting", canon_scope: "community_encyclopedia_reference", language: "zh", completeness: "organization_overview"}, output: data/raw/reference_web/douluo_sogou_shrek_academy.jsonl}
+  - {name: douluo_sogou_tianqing_bull, source_key: douluo_sogou_tianqing_bull, enabled: true, collector: l2_web, trust_level: 2, ip_domain: douluo, url: "https://baike.sogou.com/m/fullLemma?lid=128401712", source_meta: {work_title: "斗罗大陆系列", continuity: "cross_era_setting", canon_scope: "community_encyclopedia_reference", language: "zh", completeness: "spirit_beast_overview"}, output: data/raw/reference_web/douluo_sogou_tianqing_bull.jsonl}
+  - {name: douluo_world_xiaoxiang_baike, source_key: douluo_world_xiaoxiang_baike, enabled: true, collector: l2_web, trust_level: 2, ip_domain: douluo, url: "https://www.xxsy.net/baike/axdj3teuxlyu", source_meta: {work_title: "斗罗大陆外传斗罗世界", continuity: "after_douluo_main_5", canon_scope: "publisher_platform_reference", language: "zh", completeness: "work_and_plot_overview"}, output: data/raw/reference_web/douluo_world_xiaoxiang.jsonl}
+  - {name: shrek_team_dangdang_bibliography, source_key: shrek_team_dangdang_bibliography, enabled: true, collector: l2_web, trust_level: 2, ip_domain: douluo, url: "https://product.dangdang.com/29233083.html", source_meta: {work_title: "斗罗大陆外传史莱克天团", continuity: "between_douluo_4_and_5", canon_scope: "retailer_bibliographic_reference", language: "zh", completeness: "publication_metadata_and_preview"}, output: data/raw/reference_web/shrek_team_dangdang.jsonl}
+  - {name: douluo_world_books_tw_bibliography, source_key: douluo_world_books_tw_bibliography, enabled: true, collector: l2_web, trust_level: 2, ip_domain: douluo, url: "https://www.books.com.tw/products/CN11830443", source_meta: {work_title: "斗罗大陆外传斗罗世界", continuity: "after_douluo_main_5", canon_scope: "retailer_bibliographic_reference", language: "zh", completeness: "publication_metadata_and_synopsis"}, output: data/raw/reference_web/douluo_world_books_tw.jsonl}
+
+  - name: pacific_rim_fandom_reference_wiki
+    source_key: pacific_rim_fandom_reference_wiki
+    enabled: true
+    collector: reference_wiki_api_l2
+    trust_level: 2
+    ip_domain: pacific_rim
+    mediawiki:
+      api: "https://pacificrim.fandom.com/api.php"
+      pages:
+        - Karloff
+        - Brawler Yukon
+        - Pan Pacific Defense Corps
+        - Kaiju
+        - Trespasser
+        - Ranger
+        - Pons
+        - Precursors
+    http:
+      <<: *http_defaults
+      proxies:
+        http: "http://localhost:10809"
+        https: "http://localhost:10809"
+    source_meta:
+      <<: *source_meta_defaults
+      continuity: pacific_rim_film1
+      work_title: "Pacific Rim Fandom Wiki"
+      canon_scope: en_reference
+      content_status: reference
+      completeness: selected_articles
+      language: en
+      original_language: en
+      authenticity_status: unverified
+    output: data/raw/reference_web/pacific_rim_fandom.jsonl

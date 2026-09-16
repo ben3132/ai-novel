@@ -1,0 +1,32 @@
+const data=window.DASHBOARD_DATA;
+const fmt=n=>new Intl.NumberFormat('zh-CN').format(n||0);
+const bytes=n=>`${(n/1024/1024).toFixed(1)} MB`;
+const metrics=[['作品',data.totals.sources],['章节',data.works.reduce((s,w)=>s+w.chapters,0)],['实体词典',data.totals.entities||0],['事实候选',data.fact_candidates||0],['时间锚点',data.temporal?.total||0],['评测样本',data.evaluation?.samples||0],['证据数据库',bytes(data.totals.database_bytes)]];
+document.querySelector('#metrics').innerHTML=metrics.map(([label,value])=>`<div class="metric"><strong>${typeof value==='number'?fmt(value):value}</strong><span>${label}</span></div>`).join('');
+document.querySelector('#trust-note').textContent=data.trust_note;
+const q=data.quality;
+document.querySelector('#quality-strip').innerHTML=[['待核章节号',q.missing_numbers],['重复章节号',q.duplicate_numbers],['重复标题',q.duplicate_titles],['异常短章节',q.tiny_chapters],['替换字符',q.replacement_characters]].map(([label,value])=>`<div><strong>${fmt(value)}</strong><span>${label}</span></div>`).join('');
+document.querySelector('#works-body').innerHTML=data.works.map(w=>`<tr><td>${w.work_title||'未命名作品'}</td><td><span class="trust">L1-derived · ${w.trust_level}</span></td><td>${fmt(w.chapters)}</td><td>${fmt(w.units)}</td><td>${fmt(w.windows)}</td></tr>`).join('');
+const stageGrid=document.querySelector('#stage-grid');
+function renderStages(filter='all'){stageGrid.innerHTML=data.stages.filter(s=>filter==='all'||s.status===filter).map(s=>`<article class="stage ${s.status}"><div class="stage-top"><span class="stage-number">${String(s.number).padStart(2,'0')}</span><span class="status-dot" aria-label="${s.status}"></span></div><h3>${s.name}</h3><p>${s.summary}</p></article>`).join('')}
+renderStages();
+document.querySelectorAll('.filter').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('.filter').forEach(b=>b.classList.remove('active'));button.classList.add('active');renderStages(button.dataset.filter)}));
+const complete=data.stages.filter(s=>s.status==='complete').length;
+document.querySelector('#progress-fill').style.width=`${complete/data.stages.length*100}%`;
+document.querySelector('#progress-copy').textContent=`${complete} / ${data.stages.length} 个阶段已完成；${data.stages.filter(s=>s.status==='in_progress').length} 个阶段正在推进。`;
+const labels={entity_mention:'实体提及',domain_term:'领域术语',event_trigger:'事件触发',noise_marker:'疑似噪声'};
+const max=Math.max(...Object.values(data.candidates),1);
+document.querySelector('#candidate-total').textContent=fmt(data.candidate_total);
+document.querySelector('#candidate-bars').innerHTML=Object.entries(data.candidates).sort((a,b)=>b[1]-a[1]).map(([key,value])=>`<div class="bar-row"><span>${labels[key]||key}</span><div class="bar-track"><div class="bar-fill" style="width:${value/max*100}%"></div></div><span class="bar-value">${fmt(value)}</span></div>`).join('');
+document.querySelector('#candidate-dedupe').innerHTML=`<strong>${fmt(data.totals.unique_candidates)}</strong> 条已映射到最小证据单元，移除 <strong>${fmt(data.overlap_duplicates_removed)}</strong> 条窗口重叠重复。`;
+document.querySelector('#candidate-legend').textContent='候选只表示“这里可能值得检查”，不表示设定已经成立。';
+
+const bucketLabels={review_temporal_fact:'阶段状态',review_narrative_candidate:'叙述候选',review_speaker_claim:'人物发言',review_uncertain_statement:'不确定表达',pending_review:'待分流'};
+const contextLabels={dialogue_or_quotation:'引号/对话',narrative_text:'叙述文本',pending:'待判断'};
+const categoryLabels={acquire:'获得/继承',change:'状态变化',conflict:'冲突',life_state:'生死状态',relationship:'关系变化'};
+const eventCategories=Object.entries(data.event_stats?.categories||{}).map(([k,v])=>`${categoryLabels[k]||k} ${fmt(v)}`).join(' · ');
+document.querySelector('#fact-summary').textContent=`共 ${fmt(data.fact_candidates||0)} 条候选；其中事件/状态候选 ${fmt(data.event_stats?.total||0)} 条：${eventCategories}。表格展示 ${(data.fact_preview||[]).length} 条预览。`;
+document.querySelector('#facts-body').innerHTML=(data.fact_preview||[]).map(f=>`<tr><td>${f.work_id}</td><td>${f.subject}</td><td>${f.predicate}</td><td>${f.object}</td><td>${contextLabels[f.context_type]||f.context_type}</td><td>${bucketLabels[f.review_bucket]||f.review_bucket}</td></tr>`).join('');
+const m=data.model_test;
+const me=data.model_entities||{};
+document.querySelector('#model-stats').innerHTML=[['主题测试样本',m.samples],['实体测试窗口',me.windows||0],['逐字候选',me.proposals||0],['多窗口短名单',me.shortlist||0]].map(([label,value])=>`<div class="model-stat"><strong>${fmt(value)}</strong><span>${label}</span></div>`).join('');

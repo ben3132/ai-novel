@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# 环境变量（含密钥，绝不入库）
+.env
+
+# 运行时产物
+state/
+logs/
+!state/.gitkeep
+!logs/.gitkeep
+
+# 存量稿件：真实正文不入库；仓库里只保留 chapter_001~003 三章通用样例供离线自测
+data/chapters/*.md
+!data/chapters/.gitkeep
+!data/chapters/chapter_001.md
+!data/chapters/chapter_002.md
+!data/chapters/chapter_003.md
+
+# 工具
+.idea/
+.vscode/
+.DS_Store

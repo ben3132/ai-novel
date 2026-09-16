@@ -1,0 +1,73 @@
+version: 1
+ip_domain: douluo
+
+works:
+  斗罗大陆: {work_id: douluo_1, sequence: 1, continuity: main_series, kind: main_novel}
+  斗罗大陆II绝世唐门: {work_id: douluo_2, sequence: 2, continuity: main_series, kind: main_novel}
+  斗罗大陆III龙王传说: {work_id: douluo_3, sequence: 3, continuity: main_series, kind: main_novel}
+  斗罗大陆IV终极斗罗: {work_id: douluo_4, sequence: 4, continuity: main_series, kind: main_novel}
+  斗罗大陆V重生唐三: {work_id: douluo_5, sequence: 5, continuity: main_series, kind: main_novel}
+  斗罗大陆外传神界传说: {work_id: douluo_divine_realm, sequence: 101, continuity: divine_realm, kind: side_story}
+  斗罗大陆外传唐门英雄传: {work_id: douluo_tangmen_heroes, sequence: 102, continuity: divine_realm, kind: side_story}
+  斗罗大陆外传史莱克天团: {work_id: douluo_shrek_team, sequence: 103, continuity: shrek_team, kind: side_story}
+
+# 只用于候选召回，不代表实体已经归并或事实已经成立。
+entities:
+  person:
+    唐三: [唐三, 小三, 三哥, 千手修罗]
+    小舞: [小舞]
+    唐昊: [唐昊, 昊天斗罗]
+    阿银: [阿银, 蓝银皇阿银]
+    玉小刚: [玉小刚, 大师]
+    戴沐白: [戴沐白, 戴老大]
+    奥斯卡: [奥斯卡, 小奥]
+    马红俊: [马红俊, 胖子]
+    宁荣荣: [宁荣荣, 荣荣]
+    朱竹清: [朱竹清, 竹清]
+    霍雨浩: [霍雨浩, 雨浩]
+    王冬儿: [王冬, 王冬儿]
+    唐舞桐: [唐舞桐]
+    天梦冰蚕: [天梦冰蚕, 天梦哥]
+    伊莱克斯: [伊莱克斯]
+    唐舞麟: [唐舞麟, 舞麟]
+    古月娜: [古月, 娜儿, 古月娜]
+    蓝轩宇: [蓝轩宇, 轩宇]
+    白秀秀: [白秀秀, 秀秀]
+    美公子: [美公子]
+  organization:
+    史莱克学院: [史莱克学院]
+    史莱克七怪: [史莱克七怪]
+    武魂殿: [武魂殿]
+    唐门: [唐门]
+    昊天宗: [昊天宗]
+    七宝琉璃宗: [七宝琉璃宗]
+  location:
+    斗罗大陆: [斗罗大陆]
+    神界: [神界]
+    星斗大森林: [星斗大森林]
+    海神岛: [海神岛]
+  martial_soul:
+    蓝银草: [蓝银草, 蓝银皇]
+    昊天锤: [昊天锤]
+  deity:
+    海神: [海神]
+    修罗神: [修罗神]
+
+domain_terms:
+  martial_soul: [武魂, 双生武魂, 武魂融合技, 武魂真身]
+  soul_ring: [魂环, 十年魂环, 百年魂环, 千年魂环, 万年魂环, 十万年魂环]
+  soul_skill: [魂技, 第一魂技, 第二魂技, 第三魂技, 第四魂技, 第五魂技, 第六魂技, 第七魂技, 第八魂技, 第九魂技]
+  soul_bone: [魂骨, 外附魂骨, 躯干骨, 头部魂骨]
+  soul_beast: [魂兽, 十万年魂兽, 凶兽]
+  cultivation: [魂力, 魂士, 魂师, 大魂师, 魂尊, 魂宗, 魂王, 魂帝, 魂圣, 魂斗罗, 封号斗罗, 极限斗罗]
+  item: [神器, 暗器, 仙草]
+  deity: [神位, 神祇, 一级神祇, 神王]
+
+event_triggers:
+  acquire: [获得, 得到, 获取, 吸收, 继承, 觉醒, 领悟, 学会]
+  change: [突破, 晋升, 提升, 进化, 蜕变, 恢复, 失去]
+  conflict: [击败, 战胜, 杀死, 击杀, 重创, 封印]
+  life_state: [出生, 死亡, 牺牲, 复活, 转生, 重生]
+  relationship: [结识, 拜师, 收徒, 成婚, 加入, 离开, 背叛]
+
+noise_markers: ["http://", "https://", "www.", 笔趣阁, 请记住本站, 手机用户请, 本书来自, 下载站, 加入书签, 最新网址]

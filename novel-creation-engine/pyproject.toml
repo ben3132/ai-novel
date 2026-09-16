@@ -1,0 +1,20 @@
+[project]
+name = "novel-creation-engine"
+version = "0.1.0"
+description = "L3 创作层：不建库、不存事实、不做检索。只做编排时序 + 判据裁决 + 评审报告。"
+requires-python = ">=3.10"
+dependencies = []          # 零依赖：只用标准库
+readme = "README.md"
+
+[project.scripts]
+ce = "ce.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["ce", "ce.rules", "ce.adapters"]
+
+[tool.setuptools.package-data]
+ce = ["*.py"]

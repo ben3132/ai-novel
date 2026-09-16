@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="IP考据信源采集与斗罗资料处理进度仪表盘">
+  <title>斗罗资料处理台</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero">
+    <nav class="topbar" aria-label="页面导航">
+      <a class="brand" href="#top"><span class="brand-mark">证</span><span>IP考据信源</span></a>
+      <div class="nav-links">
+        <a href="#works">作品</a><a href="#pipeline">流程</a><a href="#candidates">候选</a><a href="#facts">事实候选</a><a href="#model">模型</a>
+      </div>
+    </nav>
+    <div class="hero-content" id="top">
+      <p class="eyebrow">DOULUO · EVIDENCE WORKBENCH</p>
+      <h1>把整套原著拆成<br><span>可回查的证据网络</span></h1>
+      <p class="lede">原始文本保持不变；章节、窗口、候选与后续结论逐层派生。任何一条设定，都必须能够回到作品、章节与原文位置。</p>
+      <div class="hero-actions"><a class="primary" href="#pipeline">查看实施进度</a><a class="secondary" href="#works">查看作品覆盖</a></div>
+    </div>
+    <div class="hero-grid" id="metrics" aria-label="处理统计"></div>
+  </header>
+
+  <main>
+    <section class="section" id="works">
+      <div class="section-heading"><div><p class="eyebrow">CORPUS</p><h2>八部作品，统一证据坐标</h2></div><p>当前完整文本均按 L1-derived 管理。统计来自本地 SQLite，不在页面中嵌入小说正文。</p></div>
+      <div class="notice" id="trust-note"></div>
+      <div class="quality-strip" id="quality-strip"></div>
+      <div class="table-wrap"><table><thead><tr><th>作品</th><th>信源等级</th><th>章节</th><th>证据单元</th><th>模型窗口</th></tr></thead><tbody id="works-body"></tbody></table></div>
+    </section>
+
+    <section class="section pipeline-section" id="pipeline">
+      <div class="section-heading"><div><p class="eyebrow">ROADMAP</p><h2>十八阶段实施清单</h2></div><div class="filter-group" role="group" aria-label="筛选阶段"><button class="filter active" data-filter="all">全部</button><button class="filter" data-filter="complete">已完成</button><button class="filter" data-filter="in_progress">进行中</button><button class="filter" data-filter="pending">待开始</button></div></div>
+      <div class="progress-track"><span id="progress-fill"></span></div>
+      <p class="progress-copy" id="progress-copy"></p>
+      <div class="stage-grid" id="stage-grid"></div>
+    </section>
+
+    <section class="section split" id="candidates">
+      <div><p class="eyebrow">RULE CANDIDATES</p><h2>规则先定位，模型后理解</h2><p class="body-copy">词典和句式规则负责高召回定位。候选仍不是事实，只有经过证据逐字校验、版本判断和信源交叉验证后才能进入正式设定库。</p><div id="candidate-legend" class="legend"></div></div>
+      <div class="chart-card"><div class="chart-title"><span>窗口候选构成</span><strong id="candidate-total"></strong></div><div id="candidate-bars"></div><div class="dedupe" id="candidate-dedupe"></div></div>
+    </section>
+
+    <section class="section" id="facts">
+      <div class="section-heading"><div><p class="eyebrow">GROUNDED FACT CANDIDATES</p><h2>首批可回查事实候选</h2></div><p>这里只显示短结构和部分预览，不嵌入小说正文。所有记录仍需语义审核，不能直接作为正式设定。</p></div>
+      <div class="notice" id="fact-summary"></div>
+      <div class="table-wrap"><table><thead><tr><th>作品</th><th>主语</th><th>关系/属性</th><th>宾语</th><th>语境</th><th>审核队列</th></tr></thead><tbody id="facts-body"></tbody></table></div>
+    </section>
+
+    <section class="section model-section" id="model">
+      <div class="model-card"><div><p class="eyebrow">LOCAL MODEL TEST</p><h2>3B 模型只做辅助标签</h2></div><div class="model-stats" id="model-stats"></div><p class="model-verdict">试验结果表明，本地模型能稳定返回主题结构，但会漏掉值得抽取的设定窗口。因此正式流程采用“规则放行 + 模型辅助”，不让小模型决定事实是否存在。</p></div>
+    </section>
+  </main>
+
+  <footer><span>IP考据信源采集系统</span><span>本地研究 · 原文不公开分发</span></footer>
+  <script src="data.js"></script><script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+# ===== AI 小说工具链：monorepo 顶层忽略规则 =====
+# 子项目各自还有自己的 .gitignore（更细）。这里是兜底，防止误提交。
+
+# ---- 凭据与本机配置 ----
+.env
+.env.*
+!.env.example
+*.local.*
+config/api_credentials.ps1
+config/*secret*.ps1
+config/*credential*.ps1
+config/agent_query.ps1
+config/model_processing.ps1
+!config/*.example.ps1
+nah.config.json
+!nah.config.example.json
+.ai-novel/
+
+# ---- 你的作品数据：一律不入库 ----
+# 正文（仓库里只保留通用样例 chapter_0NN.md 供自测）
+data/chapters/*.md
+!data/chapters/.gitkeep
+!data/chapters/chapter_001.md
+!data/chapters/chapter_002.md
+!data/chapters/chapter_003.md
+processed/raw/*.md
+!processed/raw/.gitkeep
+# 设定卡片
+cards/**/*.md
+!cards/**/.gitkeep
+# 证据库
+*.sqlite3
+*.db
+xs_data/
+
+# ---- 运行产物 ----
+.state-tmp/
+state/*
+!state/.gitkeep
+logs/*
+!logs/.gitkeep
+reports/
+*.log
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ---- Node（dashboard 等前端构建）----
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ---- 编辑器 / 系统 ----
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini

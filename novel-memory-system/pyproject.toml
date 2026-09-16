@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "novel-memory-system"
+version = "0.1.0"
+description = "小说记忆基础设施：PostgreSQL 16 + pgvector 的小说长程/中程/近程记忆库、ETL 导入与向量检索工具层"
+requires-python = ">=3.12"
+readme = "README.md"
+license = { text = "MIT" }
+dependencies = [
+    "sqlalchemy[asyncio]>=2.0,<2.1",
+    "asyncpg>=0.29",
+    "pgvector>=0.3",
+    "openai>=1.40",
+    "pydantic>=2.8",
+    "pydantic-settings>=2.4",
+    "python-dotenv>=1.0",
+    "tiktoken>=0.7",
+    # Windows 上 zoneinfo 无系统时区库，需 tzdata（Linux/macOS 无害）
+    "tzdata>=2024.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-asyncio>=0.23", "ruff>=0.4"]
+
+[project.scripts]
+# 安装后可直接 nms-etl --help / nms-etl --resume（等价于 python etl.py）
+nms-etl = "novel_memory_system.etl_runner:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["novel_memory_system*"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"

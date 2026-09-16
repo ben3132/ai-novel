@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ip_research_state.schema.json",
+  "title": "IP Research State",
+  "type": "object",
+  "required": ["schema_version", "ip", "works", "sources", "claims", "conflicts", "created_ts", "updated_ts"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "ip": {
+      "type": "object",
+      "required": ["ip_domain", "name", "aliases", "languages", "research_goal"],
+      "properties": {
+        "ip_domain": {"type": "string", "pattern": "^[a-z][a-z0-9_]{1,63}$"},
+        "name": {"type": "string", "minLength": 1},
+        "aliases": {"type": "array", "items": {"type": "string"}},
+        "languages": {"type": "array", "items": {"type": "string"}},
+        "research_goal": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "works": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["work_id", "title", "kind", "continuity_id", "canon_status", "status"],
+        "properties": {
+          "work_id": {"type": "string"}, "title": {"type": "string"},
+          "original_title": {"type": ["string", "null"]}, "kind": {"type": "string"},
+          "continuity_id": {"type": "string"}, "release_date": {"type": ["string", "null"]},
+          "parent_work_id": {"type": ["string", "null"]}, "canon_status": {"type": "string"},
+          "status": {"type": "string"}, "notes": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source_id", "url", "trust_level", "trust_class", "status", "requires_cross_check", "eligible_for_reasoning"],
+        "properties": {
+          "source_id": {"type": "string"}, "work_id": {"type": ["string", "null"]},
+          "source_type": {"type": "string"}, "url": {"type": "string"},
+          "publisher": {"type": ["string", "null"]}, "trust_level": {"enum": [1, 2, 3, 4, 11]},
+          "trust_class": {"type": "string"}, "status": {"enum": ["discovered", "approved", "collecting", "collected", "failed", "rejected"]},
+          "collector": {"type": ["string", "null"]}, "language": {"type": ["string", "null"]},
+          "continuity_id": {"type": "string"}, "reason": {"type": "string"},
+          "requires_cross_check": {"type": "boolean"}, "eligible_for_reasoning": {"type": "boolean"},
+          "discovered_ts": {"type": "string"}, "status_note": {"type": "string"}, "status_ts": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "claims": {"type": "array", "items": {"$ref": "#/$defs/claim"}},
+    "conflicts": {"type": "array", "items": {"type": "object"}},
+    "created_ts": {"type": "string"}, "updated_ts": {"type": "string"}
+  },
+  "$defs": {
+    "claim": {
+      "type": "object",
+      "required": ["claim_id", "subject", "predicate", "object", "work_id", "continuity_id", "evidence_window_ids", "trust_levels", "status", "needs_l1_cross_check"],
+      "properties": {
+        "claim_id": {"type": "string"}, "subject": {"type": "string"},
+        "predicate": {"type": "string"}, "object": {"type": "string"},
+        "work_id": {"type": "string"}, "continuity_id": {"type": "string"},
+        "evidence_window_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "source_ids": {"type": "array", "items": {"type": "string"}},
+        "trust_levels": {"type": "array", "items": {"enum": [1, 2, 3, 4, 11]}},
+        "status": {"enum": ["candidate", "grounded", "verified", "conflicted", "rejected"]},
+        "extraction_method": {"type": "string"}, "needs_l1_cross_check": {"type": "boolean"},
+        "created_ts": {"type": "string"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
+

@@ -1,0 +1,12 @@
+version: 1
+ip_domain: ben10
+
+# 注意：hierarchy 是"小说卷章/剧集结构筛选"的可选增强（AGENT_INTEGRATION_GUIDE.md），
+# 只适用于含章节结构的文本源（如 Series Bible / 剧本）。Warner 官网等无章节网页
+# 源不纳入层级；检索证据不受影响（search_evidence 只依赖 sources/context_windows/windows_fts）。
+works:
+  "Ben 10: Hero Generation Series Bible":
+    work_id: ben10_hero_generation_bible
+    sequence: 1
+    continuity: ben10_alien_force_development
+    kind: series_bible

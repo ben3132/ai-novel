@@ -1,0 +1,12 @@
+# 私密凭据与本地环境文件绝不进入版本库
+.env
+.env.*
+!.env.example
+config/api_credentials.ps1
+config/*secret*
+config/*credential*.local.*
+
+# Python 临时文件
+__pycache__/
+*.py[cod]
+.pytest_cache/

@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "novel-asset-hub"
+version = "1.2.0"
+description = "AI 小说创作的设定资产管理器：卡片化存储 + 写前检索 + 写后审计 + SQLite 索引与版本层"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+keywords = ["novel", "worldbuilding", "llm", "knowledge-base", "writing"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Text Processing :: Markup :: Markdown",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.scripts]
+nah = "nah.cli:main"
+
+[tool.setuptools]
+packages = ["nah"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
